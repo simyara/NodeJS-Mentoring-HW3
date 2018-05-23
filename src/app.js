@@ -22,22 +22,15 @@ const fileNameArg = 3;
 
 let actionName = getValueByIndex('--action', actionNameArg) || getValueByIndex('-a', actionNameArg);
 let fileName = getValueByIndex('--file', fileNameArg) || getValueByIndex('-f', fileNameArg);
+let filePath = __dirname + '/data/' + fileName;
 let helpFlag = isHelpNeed();
 
 // console.log(actionName);
 // console.log(fileName);
 // console.log(helpFlag);
 //
-process.stdin.setEncoding('utf8');
 
-process.stdin.on('readable', () => {
-    const chunk = process.stdin.read();
-    if (chunk !== null) {
-        stream[actionName](""+chunk);
-    }
-});
+stream[actionName](filePath);
 
-process.stdin.on('end', () => {
-    process.stdout.write('end');
-});
+
 

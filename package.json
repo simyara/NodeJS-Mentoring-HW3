@@ -28,6 +28,7 @@
   },
   "homepage": "https://github.com/simyara/NodeJS-Mentoring-HW3#readme",
   "dependencies": {
-    "babel-promisify": "^1.0.0"
+    "babel-promisify": "^1.0.0",
+    "through2": "^2.0.3"
   }
 }
