@@ -1,3 +1,1 @@
-"use strict";
-
-function reverse(str) {/* ... */}
+Yaraslauna Simaka
