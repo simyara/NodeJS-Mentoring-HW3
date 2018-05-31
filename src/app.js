@@ -30,7 +30,7 @@ console.log('File name: ' + fileName);
 console.log('Is Help: ' + helpFlag);
 
 if (actionName && stream.hasOwnProperty(actionName)){
-    stream[actionName](filePath);
+    stream[actionName](fileName);
 }
 
 
