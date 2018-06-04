@@ -1,1 +1,0 @@
-Yaraslauna Simaka
