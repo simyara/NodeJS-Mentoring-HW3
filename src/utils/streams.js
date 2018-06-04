@@ -13,20 +13,17 @@ class Util {
 
         this.actionName = helper.getValueByIndex('--action', actionNameArg) || helper.getValueByIndex('-a', actionNameArg);
         this.fileName = helper.getValueByIndex('--file', fileNameArg) || helper.getValueByIndex('-f', fileNameArg);
-        //this.filePath = `${dirPath}${this.fileName }`;
         this.helpFlag = helper.isHelpNeed(helpArg);
-        this.path = helper.getValueByIndex('--path', helpArg) || helper.getValueByIndex('-p', helpArg);
+        this.path = helper.getValueByIndex('--path', pathArg) || helper.getValueByIndex('-p', pathArg);
 
         console.log('Params:');
         console.log('Action name: ' + this.actionName);
         console.log('File name: ' + this.fileName);
         console.log('File path: ' + this.path);
-        //console.log('File filePath: ' + this.filePath);
         console.log('Is Help: ' + this.helpFlag);
     }
 
     _csv2json(data) {
-        console.log(data);
         let jsonObj = [];
         let bufferString = data.toString();
         let arr = bufferString.split('\n');
@@ -51,10 +48,15 @@ class Util {
 
         if (this.actionName){
             if (typeof this[this.actionName] === 'function') {
-                this[this.actionName](this.fileName || this.path);
+                try {
+                    this[this.actionName]();
+                } catch (e) {
+                    console.log(`Failed with ${e}`);
+                }
+
             }
             else {
-                throw new Error(`Action ${this.actionName} not supported`);
+                throw new Error(`Action ${this.actionName} is not supported`);
             }
         }
         else {
@@ -99,8 +101,12 @@ class Util {
         });
     }
 
-    outputFile(fileName) {
-        const filePath = `${dirPath}${fileName}`;
+    outputFile() {
+        if (!this.fileName) {
+            throw new Error(`File name not exist`);
+        }
+
+        const filePath = `${dirPath}${this.fileName}`;
 
         let readStream = fs.createReadStream(filePath);
         readStream.on('open', function () {
@@ -111,7 +117,10 @@ class Util {
         });
     }
 
-    convertFromFile(fileName) {
+    convertFromFile() {
+        if (!this.fileName) {
+            throw new Error(`File name not exist`);
+        }
 
         const util = require('util');
         const Transform = require('stream').Transform;
@@ -124,7 +133,7 @@ class Util {
             cb();
         };
 
-        const filePath = `${dirPath}${fileName}`;
+        const filePath = `${dirPath}${this.fileName}`;
         let readStream = fs.createReadStream(filePath);
         readStream.on('open', function () {
             readStream.pipe(parser).pipe(process.stdout);
@@ -135,12 +144,17 @@ class Util {
 
     }
 
-    convertToFile(fileName) {
+    convertToFile() {
+
+        if (!this.fileName) {
+            throw new Error(`File name not exist`);
+        }
+
         const util = require('util');
         const Transform = require('stream').Transform;
 
-        const filePath = `${dirPath}${fileName}`;
-        let namePart, ext = ( namePart = fileName.split(".") ).length > 1 ? namePart.pop() : "";
+        const filePath = `${dirPath}${this.fileName}`;
+        let namePart, ext = ( namePart = this.fileName.split(".") ).length > 1 ? namePart.pop() : "";
         const fileNameToWtite =`${namePart}.json `;
         const filePathToWtite = `${dirPath}${fileNameToWtite}`;
 
@@ -168,8 +182,94 @@ class Util {
         });
     }
 
+    cssBundler(){
+        if (!this.path) {
+            throw new Error(`Path name not exist`);
+        }
 
+        const path = `${dirPath}${this.path}/`;
+        const fileNameToWtite =`bundle.css`;
+        const filePathToWtite =  `${path}${fileNameToWtite}`;
 
+        const readline = require('readline');
+
+        let promises = [];
+
+        let downloadFile = function () {
+            return new Promise(function (resolve, reject) {
+                const  https = require('https');
+
+                let file = fs.createWriteStream(`${path}nodejs-homework3.css`);
+                let request = https.get("https://doc-0g-0s-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/jsn8uecejvi98hj4v1vl2t1p830iaq44/1528106400000/05195043963524607236/*/1tCm9Xb4mok4Egy2WjGqdYYkrGia0eh7X?e=download", function(response) {
+                    response.pipe(file);
+                    response.on('end', function() {
+                        resolve();
+                    });
+                });
+            });
+        };
+
+        let readDir = function (path) {
+            fs.readdir(path, function (err, files) {
+                for (let i = 0; i < files.length; i++) {
+                    promises.push(readFile(path + files[i]));
+
+                    if (i == (files.length - 1)) {
+                        let results = Promise.all(promises);
+
+                        results.then(writeFile)
+                            .catch(function (err) {
+                            console.log(err)
+                        });
+                    }
+
+                }
+            });
+        };
+
+        let readFile = function (file) {
+            return new Promise(function (resolve, reject) {
+                let lines = [];
+                let rl    = readline.createInterface({
+                    input: fs.createReadStream(file)
+                });
+
+                rl.on('line', function (line) {
+                    // Split line on comma and remove quotes
+                    let columns = line
+                        .replace(/"/g, '')
+                        .split(',');
+
+                    lines.push(line);
+                });
+
+                rl.on('close', function () {
+                    // Add newlines to lines
+                    lines = lines.join("\n");
+                    resolve(lines)
+                });
+            });
+        };
+
+        let writeFile = function (data) {
+            return new Promise(function (resolve, reject) {
+                fs.appendFile(filePathToWtite, data, 'utf8', function (err) {
+                    if (err) {
+                        resolve('Error!');
+                    } else {
+                        reject('Succeeded!');
+                    }
+                });
+            });
+        };
+
+        downloadFile().then(function () {
+                console.log('Downloaded!');
+                readDir(path);
+            }).catch(function (err) {
+                console.log(err)
+        });
+    }
 }
 
 exports.default = Util;

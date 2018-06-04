@@ -7,11 +7,3 @@ try {
 } catch (e) {
     console.log(`Failed with ${e}`);
 }
-
-
-
-
-
-
-
-
