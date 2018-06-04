@@ -1,126 +1,180 @@
 const path = require('path');
 const dirPath = `${path.dirname(__dirname)}/data/`;
+const helper = require('./helper').default;
+const fs = require('fs');
 
-function csv2json(data) {
-    console.log(data);
-    var jsonObj = [];
-    var bufferString = data.toString();
-    var arr = bufferString.split('\n');
-    var headers = arr[0].split(',');
-    for (var i = 1; i < arr.length; i++) {
-        var data = arr[i].split(',');
-        var obj = {};
-        for (var j = 0; j < data.length; j++) {
-            obj[headers[j].trim()] = data[j].trim();
-        }
-        jsonObj.push(obj);
+class Util {
+    constructor() {
+        console.log(`Util class`);
+        const actionNameArg = 1;
+        const fileNameArg = 3;
+        const pathArg = 3;
+        const helpArg = 1;
+
+        this.actionName = helper.getValueByIndex('--action', actionNameArg) || helper.getValueByIndex('-a', actionNameArg);
+        this.fileName = helper.getValueByIndex('--file', fileNameArg) || helper.getValueByIndex('-f', fileNameArg);
+        //this.filePath = `${dirPath}${this.fileName }`;
+        this.helpFlag = helper.isHelpNeed(helpArg);
+        this.path = helper.getValueByIndex('--path', helpArg) || helper.getValueByIndex('-p', helpArg);
+
+        console.log('Params:');
+        console.log('Action name: ' + this.actionName);
+        console.log('File name: ' + this.fileName);
+        console.log('File path: ' + this.path);
+        //console.log('File filePath: ' + this.filePath);
+        console.log('Is Help: ' + this.helpFlag);
     }
 
-    return JSON.stringify(jsonObj);
-}
+    _csv2json(data) {
+        console.log(data);
+        let jsonObj = [];
+        let bufferString = data.toString();
+        let arr = bufferString.split('\n');
+        let headers = arr[0].split(',');
+        for (let i = 1; i < arr.length; i++) {
+            let data = arr[i].split(',');
+            let obj = {};
+            for (let j = 0; j < data.length; j++) {
+                obj[headers[j].trim()] = data[j].trim();
+            }
+            jsonObj.push(obj);
+        }
 
-function reverse() {
-    process.stdin.setEncoding('utf8');
+        return JSON.stringify(jsonObj);
+    }
 
-    process.stdout.write('Please, input data values separated by blanks: ');
+    performAction(){
+        if (this.helpFlag) {
+            this.outputFile('help.txt');
+            return;
+        }
 
-    process.stdin.on('readable', () => {
-        const chunk = process.stdin.read();
-        if (chunk !== null) {
-            var reverseStr = chunk.toString().split(' ').reverse().join(' ');
-            if (reverseStr.length > 0) {
-                process.stdout.write(`reverse data: ${reverseStr}`);
+        if (this.actionName){
+            if (typeof this[this.actionName] === 'function') {
+                this[this.actionName](this.fileName || this.path);
+            }
+            else {
+                throw new Error(`Action ${this.actionName} not supported`);
             }
         }
-    });
-    process.on('SIGINT', function(){
-        process.stdout.write('\n end \n');
-        process.exit();
-    });
-}
-
-function transform(str) {
-    var through = require('through2');
-
-    process.stdout.write('Please, input text: ');
-
-    var tr =function write(str, encoding, next) {
-        this.push(str.toString().toUpperCase());
-        next();
+        else {
+            throw new Error(`Action not exist`);
+        }
     }
-    process.stdin.pipe(through(tr)).pipe(process.stdout);
 
-    process.on('SIGINT', function(){
-        process.stdout.write('\n end \n');
-        process.exit();
-    });
+    reverse() {
+        process.stdin.setEncoding('utf8');
+
+        process.stdout.write('Please, input data values separated by blanks: ');
+
+        process.stdin.on('readable', () => {
+            const chunk = process.stdin.read();
+            if (chunk !== null) {
+                let reverseStr = chunk.toString().split(' ').reverse().join(' ');
+                if (reverseStr.length > 0) {
+                    process.stdout.write(`reverse data: ${reverseStr}`);
+                }
+            }
+        });
+        process.on('SIGINT', function(){
+            process.stdout.write('\n end \n');
+            process.exit();
+        });
+    }
+
+    transform() {
+        const through = require('through2');
+
+        process.stdout.write('Please, input text: ');
+
+        let tr =function write(str, encoding, next) {
+            this.push(str.toString().toUpperCase());
+            next();
+        }
+        process.stdin.pipe(through(tr)).pipe(process.stdout);
+
+        process.on('SIGINT', function(){
+            process.stdout.write('\n end \n');
+            process.exit();
+        });
+    }
+
+    outputFile(fileName) {
+        const filePath = `${dirPath}${fileName}`;
+
+        let readStream = fs.createReadStream(filePath);
+        readStream.on('open', function () {
+            readStream.pipe(process.stdout);
+        });
+        readStream.on('error', function (err) {
+            console.log(err);
+        });
+    }
+
+    convertFromFile(fileName) {
+
+        const util = require('util');
+        const Transform = require('stream').Transform;
+
+        let parser = new Transform();
+        let _this = this;
+        parser._transform = function (chunk, enc, cb) {
+            let transformChunk = _this._csv2json(chunk);
+            this.push(transformChunk);
+            cb();
+        };
+
+        const filePath = `${dirPath}${fileName}`;
+        let readStream = fs.createReadStream(filePath);
+        readStream.on('open', function () {
+            readStream.pipe(parser).pipe(process.stdout);
+        });
+        readStream.on('error', function (err) {
+            console.log(err);
+        });
+
+    }
+
+    convertToFile(fileName) {
+        const util = require('util');
+        const Transform = require('stream').Transform;
+
+        const filePath = `${dirPath}${fileName}`;
+        let namePart, ext = ( namePart = fileName.split(".") ).length > 1 ? namePart.pop() : "";
+        const fileNameToWtite =`${namePart}.json `;
+        const filePathToWtite = `${dirPath}${fileNameToWtite}`;
+
+        let parser = new Transform();
+        let _this = this;
+        parser._transform = function (chunk, enc, cb) {
+            let transformChunk = _this._csv2json(chunk);
+            this.push(transformChunk);
+            cb();
+        };
+
+        let readStream = fs.createReadStream(filePath);
+        let writeStream = fs.createWriteStream(filePathToWtite);
+        readStream.on('open', function () {
+            readStream.pipe(parser).pipe(writeStream);
+        })
+            .on('error', function (err) {
+            console.log(err);
+        });
+        writeStream.on('error', function (err) {
+            console.log(err);
+        })
+            .on('finish', function() {
+            console.log('Done!');
+        });
+    }
+
+
+
 }
 
-function outputFile(fileName) {
-    const filePath = `${dirPath}${fileName}`;
-    var fs = require('fs');
-    var readStream = fs.createReadStream(filePath);
-    readStream.on('open', function () {
-        readStream.pipe(process.stdout);
-    });
-    readStream.on('error', function(){
-        console.log('Error: file not found');
-    });
-}
+exports.default = Util;
 
-function convertFromFile(fileName) {
-    const filePath = `${dirPath}${fileName}`;
-    var util = require('util')
-        , Transform = require('stream').Transform;
 
-    var parser = new Transform();
-    parser._transform = function (chunk, enc, cb) {
-        var transformChunk = csv2json(chunk);
-        this.push(transformChunk);
-        cb();
-    };
 
-    var fs = require('fs');
-    var readStream = fs.createReadStream(filePath);
-    readStream.on('open', function () {
-        readStream.pipe(parser).pipe(process.stdout);
-    });
-    readStream.on('error', function(){
-        console.log('Error: file not found');
-    });
 
-}
 
-function convertToFile(fileName) {
-    var util = require('util')
-        , Transform = require('stream').Transform;
-
-    const filePath = `${dirPath}${fileName}`;
-    var namePart, ext = ( namePart = fileName.split(".") ).length > 1 ? namePart.pop() : "";
-    const fileNameToWtite =`${namePart}.json `;
-    const filePathToWtite = `${dirPath}${fileNameToWtite}`;
-    var parser = new Transform();
-    parser._transform = function (chunk, enc, cb) {
-        var transformChunk = csv2json(chunk);
-        this.push(transformChunk);
-        cb();
-    };
-
-    var fs = require('fs');
-    var readStream = fs.createReadStream(filePath);
-    var writeStream = fs.createWriteStream(filePathToWtite);
-    readStream.on('open', function () {
-        readStream.pipe(parser).pipe(writeStream);
-    });
-    readStream.on('error', function(){
-        console.log('Error: file not found');
-    });
-}
-
-exports.default = {
-    reverse: reverse,
-    transform: transform,
-    outputFile: outputFile,
-    convertFromFile: convertFromFile,
-    convertToFile: convertToFile
-};
