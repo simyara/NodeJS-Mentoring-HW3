@@ -1,9 +1,10 @@
-const path = require('path');
-const dirPath = `${path.dirname(__dirname)}/data/`;
-const helper = require('./helper').default;
-const fs = require('fs');
+import path from 'path';
+import helper from './helper';
+import fs from 'fs';
 
-class Util {
+const dirPath = `${path.dirname(__dirname)}/data/`;
+
+export default class  Util {
     constructor() {
         console.log(`Util class`);
         const actionNameArg = 1;
@@ -42,6 +43,7 @@ class Util {
 
     performAction(){
         if (this.helpFlag) {
+            this.fileName = 'help.txt';
             this.outputFile('help.txt');
             return;
         }
@@ -272,7 +274,6 @@ class Util {
     }
 }
 
-exports.default = Util;
 
 
 

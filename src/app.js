@@ -1,4 +1,4 @@
-let Util = require('./utils/streams.js').default;
+import Util from './utils/streams.js';
 
 let util = new Util();
 
