@@ -87,7 +87,7 @@ export default class  Util {
     }
 
     transform() {
-        const through = require('through2');
+        import through from 'through2';
 
         process.stdout.write('Please, input text: ');
 
@@ -124,8 +124,8 @@ export default class  Util {
             throw new Error(`File name not exist`);
         }
 
-        const util = require('util');
-        const Transform = require('stream').Transform;
+        import util from 'util';
+        import Transform from 'stream';
 
         let parser = new Transform();
         let _this = this;
@@ -152,8 +152,9 @@ export default class  Util {
             throw new Error(`File name not exist`);
         }
 
-        const util = require('util');
-        const Transform = require('stream').Transform;
+        import util from 'util';
+        import stream from 'stream';
+        const Transform = stream.Transform;
 
         const filePath = `${dirPath}${this.fileName}`;
         let namePart, ext = ( namePart = this.fileName.split(".") ).length > 1 ? namePart.pop() : "";
@@ -193,13 +194,13 @@ export default class  Util {
         const fileNameToWtite =`bundle.css`;
         const filePathToWtite =  `${path}${fileNameToWtite}`;
 
-        const readline = require('readline');
+        import readline from 'readline';
 
         let promises = [];
 
         let downloadFile = function () {
             return new Promise(function (resolve, reject) {
-                const  https = require('https');
+                import https from 'https';
 
                 let file = fs.createWriteStream(`${path}nodejs-homework3.css`);
                 let request = https.get("https://doc-0g-0s-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/jsn8uecejvi98hj4v1vl2t1p830iaq44/1528106400000/05195043963524607236/*/1tCm9Xb4mok4Egy2WjGqdYYkrGia0eh7X?e=download", function(response) {
