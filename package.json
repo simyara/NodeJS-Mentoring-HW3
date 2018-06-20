@@ -7,7 +7,7 @@
     "test": "echo \"Error: no test specified\" && exit 1",
     "start": "nodemon dist/app.js",
     "build": "babel src --out-dir dist",
-    "bStart": "npx babel-node src/app.js"
+    "bStart": "babel-node src/app.js"
   },
   "repository": {
     "type": "git",
@@ -20,8 +20,6 @@
     "babel-cli": "^6.26.0",
     "babel-core": "^6.26.3",
     "babel-preset-env": "^1.7.0",
-    "babel-preset-stage-0": "^6.24.1",
-    "babel-preset-stage-2": "^6.24.1",
     "babel-register": "^6.26.0",
     "nodemon": "^1.17.3"
   },
@@ -30,7 +28,6 @@
   },
   "homepage": "https://github.com/simyara/NodeJS-Mentoring-HW3#readme",
   "dependencies": {
-    "babel-promisify": "^1.0.0",
     "through2": "^2.0.3"
   }
 }

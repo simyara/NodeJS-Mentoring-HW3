@@ -1,6 +1,7 @@
 import path from 'path';
 import helper from './helper';
 import fs from 'fs';
+import util from 'util';
 
 const dirPath = `${path.dirname(__dirname)}/data/`;
 
@@ -122,9 +123,8 @@ export default class  Util {
     convertFromFile() {
         if (!this.fileName) {
             throw new Error(`File name not exist`);
-        }
+     }
 
-        import util from 'util';
         import Transform from 'stream';
 
         let parser = new Transform();
@@ -152,7 +152,6 @@ export default class  Util {
             throw new Error(`File name not exist`);
         }
 
-        import util from 'util';
         import stream from 'stream';
         const Transform = stream.Transform;
 
@@ -202,8 +201,10 @@ export default class  Util {
             return new Promise(function (resolve, reject) {
                 import https from 'https';
 
+                const url = "https://doc-0g-0s-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/jsn8uecejvi98hj4v1vl2t1p830iaq44/1528106400000/05195043963524607236/*/1tCm9Xb4mok4Egy2WjGqdYYkrGia0eh7X?e=download";
+
                 let file = fs.createWriteStream(`${path}nodejs-homework3.css`);
-                let request = https.get("https://doc-0g-0s-docs.googleusercontent.com/docs/securesc/ha0ro937gcuc7l7deffksulhg5h7mbp1/jsn8uecejvi98hj4v1vl2t1p830iaq44/1528106400000/05195043963524607236/*/1tCm9Xb4mok4Egy2WjGqdYYkrGia0eh7X?e=download", function(response) {
+                let request = https.get(url, function(response) {
                     response.pipe(file);
                     response.on('end', function() {
                         resolve();
