@@ -1,0 +1,7 @@
+Usage: node [ script ] [arguments]
+
+Options:
+-a, --action       action name which should be performed
+-a, --file         optional second argument for actions
+-h, --help         help
+

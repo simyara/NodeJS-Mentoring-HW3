@@ -1,0 +1,33 @@
+{
+  "name": "NodeJS-Mentoring-HW3",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon dist/app.js",
+    "build": "babel src --out-dir dist",
+    "bStart": "babel-node src/app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/simyara/NodeJS-Mentoring-HW3.git"
+  },
+  "keywords": [],
+  "author": "Yaraslauna Simaka",
+  "license": "ISC",
+  "devDependencies": {
+    "babel-cli": "^6.26.0",
+    "babel-core": "^6.26.3",
+    "babel-preset-env": "^1.7.0",
+    "babel-register": "^6.26.0",
+    "nodemon": "^1.17.3"
+  },
+  "bugs": {
+    "url": "https://github.com/simyara/NodeJS-Mentoring-HW3/issues"
+  },
+  "homepage": "https://github.com/simyara/NodeJS-Mentoring-HW3#readme",
+  "dependencies": {
+    "through2": "^2.0.3"
+  }
+}
